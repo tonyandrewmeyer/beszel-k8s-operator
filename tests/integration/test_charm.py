@@ -51,7 +51,10 @@ def test_service_is_running(deploy: jubilant.Juju):
     unit_name = f"{APP_NAME}/0"
 
     # Check that the Pebble service is running
-    result = juju.run_unit(unit_name, f"PEBBLE_SOCKET=/charm/containers/beszel/pebble.socket /charm/bin/pebble services")
+    result = juju.run_unit(
+        unit_name,
+        "PEBBLE_SOCKET=/charm/containers/beszel/pebble.socket /charm/bin/pebble services",
+    )
     assert "beszel" in result.stdout
     assert "active" in result.stdout.lower() or "running" in result.stdout.lower()
 
@@ -214,7 +217,9 @@ def test_custom_port_configuration(deploy: jubilant.Juju):
     assert "FAILED" not in result.stdout, "Service not responding on port 8091"
 
     # Verify old port is not responding
-    result = juju.run_unit(unit_name, "curl -f --connect-timeout 2 http://localhost:8090/ 2>&1 || echo 'FAILED'")
+    result = juju.run_unit(
+        unit_name, "curl -f --connect-timeout 2 http://localhost:8090/ 2>&1 || echo 'FAILED'"
+    )
     assert "FAILED" in result.stdout, "Service still responding on old port"
 
     # Change back to default port

@@ -65,6 +65,7 @@ def test_config_from_charm_config():
 
 def test_config_defaults():
     """Test BeszelConfig default values."""
+
     class MockConfig:
         def get(self, key, default=None):
             return default
@@ -310,9 +311,7 @@ def test_oauth_client_config_without_external_hostname(ctx: ops.testing.Context)
 
 def test_oauth_client_config_with_external_hostname(ctx: ops.testing.Context):
     """Test OAuth client config with external hostname."""
-    state_in = ops.testing.State(
-        leader=True, config={"external-hostname": "beszel.example.com"}
-    )
+    state_in = ops.testing.State(leader=True, config={"external-hostname": "beszel.example.com"})
 
     with ctx(ctx.on.install(), state_in) as manager:
         charm = manager.charm

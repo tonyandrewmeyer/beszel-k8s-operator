@@ -5,14 +5,11 @@
 
 from __future__ import annotations
 
-import json
 import logging
-import pathlib
 import secrets
 import time
 from typing import TYPE_CHECKING
 
-import httpx
 import ops
 
 if TYPE_CHECKING:

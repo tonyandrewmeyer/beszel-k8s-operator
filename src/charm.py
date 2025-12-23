@@ -86,9 +86,7 @@ class BeszelCharm(ops.CharmBase):
         self.container = self.unit.get_container(CONTAINER_NAME)
 
         # Relations
-        self.ingress = ingress.IngressPerAppRequirer(
-            self, port=8090, strip_prefix=True
-        )
+        self.ingress = ingress.IngressPerAppRequirer(self, port=8090, strip_prefix=True)
         self.oauth = oauth.OAuthRequirer(self, client_config=self._get_oauth_client_config())
         self.s3 = s3.S3Requirer(self, "s3-credentials")
 
@@ -110,9 +108,7 @@ class BeszelCharm(ops.CharmBase):
 
         # Actions
         framework.observe(self.on.get_admin_url_action, self._on_get_admin_url_action)
-        framework.observe(
-            self.on.create_agent_token_action, self._on_create_agent_token_action
-        )
+        framework.observe(self.on.create_agent_token_action, self._on_create_agent_token_action)
         framework.observe(self.on.backup_now_action, self._on_backup_now_action)
         framework.observe(self.on.list_backups_action, self._on_list_backups_action)
 
@@ -186,9 +182,7 @@ class BeszelCharm(ops.CharmBase):
         logger.info("OAuth information has changed")
         self._configure_workload()
 
-    def _on_s3_credentials_changed(
-        self, event: s3.CredentialsChangedEvent
-    ) -> None:
+    def _on_s3_credentials_changed(self, event: s3.CredentialsChangedEvent) -> None:
         """Handle S3 credentials changed event.
 
         Args:
