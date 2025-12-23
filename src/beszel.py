@@ -136,9 +136,9 @@ def create_backup(container: ops.Container) -> dict[str, str] | None:
     backup_filename = f"beszel-backup-{timestamp}.db"
     backup_path = f"{BACKUP_DIR}/{backup_filename}"
 
-    # Copy database file to backup location
-    proc = container.exec(["cp", db_path, backup_path], combine_stderr=True)
-    proc.wait_output()
+    # Copy database file to backup location using Pebble's pull/push
+    data = container.pull(db_path, encoding=None)
+    container.push(backup_path, data.read(), make_dirs=True)
 
     if container.exists(backup_path):
         logger.info("Created backup at %s", backup_path)
@@ -167,31 +167,14 @@ def list_backups(container: ops.Container) -> list[dict[str, str]]:
 
     backups = []
 
-    proc = container.exec(["ls", "-1", BACKUP_DIR], combine_stderr=True)
-    stdout, _ = proc.wait_output()
-
-    for filename in stdout.strip().split("\n"):
-        if not filename or not filename.startswith("beszel-backup-"):
-            continue
-
-        backup_path = f"{BACKUP_DIR}/{filename}"
-
-        # Get file size
-        proc = container.exec(["stat", "-c", "%s", backup_path], combine_stderr=True)
-        size_stdout, _ = proc.wait_output()
-        size = size_stdout.strip()
-
-        # Get modification time
-        proc = container.exec(["stat", "-c", "%Y", backup_path], combine_stderr=True)
-        mtime_stdout, _ = proc.wait_output()
-        mtime = mtime_stdout.strip()
-
+    # Use Pebble's list_files to enumerate backups
+    for file_info in container.list_files(BACKUP_DIR, pattern="beszel-backup-*.db"):
         backups.append(
             {
-                "filename": filename,
-                "path": backup_path,
-                "size": size,
-                "modified": mtime,
+                "filename": file_info.name,
+                "path": file_info.path,
+                "size": str(file_info.size),
+                "modified": file_info.last_modified.isoformat() if file_info.last_modified else "",
             }
         )
 

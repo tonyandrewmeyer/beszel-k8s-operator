@@ -310,7 +310,8 @@ class BeszelCharm(ops.CharmBase):
                 "beszel-ready": {
                     "override": "replace",
                     "level": "ready",
-                    "http": {"url": f"http://localhost:{config.port}/"},
+                    "exec": {"command": f"/beszel health --url http://localhost:{config.port}"},
+                    "period": "60s",
                 }
             },
         }
