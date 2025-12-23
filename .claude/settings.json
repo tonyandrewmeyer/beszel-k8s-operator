@@ -37,8 +37,8 @@
     ],
     "deny": [
     ],
-    "additionalDirectories": ["../concierge"],
-    "defaultMode": "acceptEdits",
+    "additionalDirectories": [],
+    "defaultMode": "acceptEdits"
   },
   "hooks": {
     "PostToolUse": [

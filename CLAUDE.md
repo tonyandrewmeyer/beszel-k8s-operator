@@ -2,6 +2,32 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## Beszel Charm Overview
+
+This repository contains a Kubernetes charm for **Beszel Hub**, a lightweight server monitoring platform. Beszel consists of two components:
+
+- **Hub**: A web dashboard built on PocketBase that displays monitoring data (this charm)
+- **Agent**: Lightweight monitoring service deployed on systems to monitor (separate deployment)
+
+### Key Features
+
+The charm provides:
+- Deployment of Beszel Hub as a Kubernetes workload
+- OAuth/OIDC authentication via identity-platform integration
+- Ingress support for external access
+- S3-compatible backup integration
+- Storage management for PocketBase database
+- Actions for URL retrieval, token generation, and backups
+
+### Architecture Decisions
+
+- **Kubernetes charm**: Beszel Hub is containerized (`henrygd/beszel` OCI image)
+- **Single-unit deployment**: PocketBase uses SQLite, limiting to one instance
+- **OAuth via relation**: Authentication handled by `oauth` relation with identity-platform/hydra
+- **Storage**: Requires persistent volume for `/beszel_data` (PocketBase database)
+
+See [PLAN.md](PLAN.md) for comprehensive implementation details.
+
 ## Juju, Pebble, and Charms
 
 We are building a *charm* to be deployed on a *Juju* controller. All the information you need about Juju can be found at https://documentation.ubuntu.com/juju/latest/
