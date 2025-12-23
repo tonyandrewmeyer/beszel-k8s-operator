@@ -2,16 +2,20 @@
 # See https://documentation.ubuntu.com/charmcraft/stable/reference/files/charmcraft-yaml-file/
 type: charm
 name: beszel
-title: Charm Template
-summary: A very short one-line summary of the charm.
+title: Beszel Hub
+summary: Lightweight server monitoring with Docker stats and historical data
 description: |
-  A single sentence that says what the charm is, concisely and memorably.
+  Beszel is a lightweight server monitoring platform that provides
+  Docker/Podman statistics, historical data, and customizable alerts.
 
-  A paragraph of one to three short sentences, that describe what the charm does.
+  This charm deploys the Beszel Hub component, which serves as the central
+  dashboard for viewing and managing monitored systems.
 
-  A third paragraph that explains what need the charm meets.
+  The Hub is built on PocketBase and provides a web interface for
+  configuring systems, viewing metrics, and managing alerts.
 
-  Finally, a paragraph that describes whom the charm is useful for.
+  Useful for system administrators and DevOps teams who need lightweight,
+  resource-efficient monitoring without the overhead of heavier solutions.
 
 # Documentation:
 # https://documentation.ubuntu.com/charmcraft/stable/howto/build-guides/select-platforms/
@@ -27,41 +31,115 @@ parts:
     build-snaps:
       - astral-uv
 
-# (Optional) Configuration options for the charm
-# This config section defines charm config options, and populates the Configure
-# tab on Charmhub.
-# More information on this section at:
-# https://documentation.ubuntu.com/charmcraft/stable/reference/files/charmcraft-yaml-file/#config
-# General configuration documentation:
-# https://documentation.ubuntu.com/juju/3.6/reference/configuration/#application-configuration
+# Configuration options for the charm
 config:
   options:
-    # An example config option to customise the log level of the workload
+    container-image:
+      description: |
+        OCI image to use for the Beszel Hub.
+        Allows pinning to specific versions or using custom builds.
+      default: "henrygd/beszel:latest"
+      type: string
+
+    port:
+      description: |
+        Port on which the Beszel Hub listens.
+      default: 8090
+      type: int
+
+    external-hostname:
+      description: |
+        External hostname for OAuth callback URLs (e.g., "beszel.example.com").
+        Required when using oauth relation with identity platform.
+        If not set, falls back to local authentication only.
+      default: ""
+      type: string
+
+    s3-backup-enabled:
+      description: |
+        Enable automatic backups to S3-compatible storage.
+        Requires s3-credentials relation to be established.
+      default: false
+      type: boolean
+
+    s3-endpoint:
+      description: |
+        S3-compatible storage endpoint URL.
+        Required if s3-backup-enabled is true.
+      default: ""
+      type: string
+
+    s3-bucket:
+      description: |
+        S3 bucket name for backups.
+      default: ""
+      type: string
+
+    s3-region:
+      description: |
+        S3 region.
+      default: "us-east-1"
+      type: string
+
     log-level:
       description: |
-        Configures the log level of gunicorn.
-
-        Acceptable values are: "info", "debug", "warning", "error" and "critical"
+        Log verbosity level.
+        Acceptable values are: "info", "debug", "warning", "error"
       default: "info"
       type: string
 
 # Your workload's containers.
-# https://documentation.ubuntu.com/charmcraft/stable/reference/files/charmcraft-yaml-file/#containers
 containers:
-  some-container:
-    resource: some-container-image
+  beszel:
+    resource: beszel-image
+
+# Storage for PocketBase database and backups
+storage:
+  beszel-data:
+    type: filesystem
+    description: PocketBase database, configuration, and local backups
+    minimum-size: 1G
+    location: /beszel_data
 
 # This field populates the Resources tab on Charmhub.
-# https://documentation.ubuntu.com/charmcraft/stable/reference/files/charmcraft-yaml-file/#resources
 resources:
-  # An OCI image resource for each container listed above.
-  # You may remove this if your charm will run without a workload sidecar container.
-  some-container-image:
+  beszel-image:
     type: oci-image
-    description: OCI image for the 'some-container' container
-    # The upstream-source field is ignored by Charmcraft and Juju, but it can be
-    # useful to developers in identifying the source of the OCI image.  It is also
-    # used by the 'canonical/charming-actions' GitHub action for automated releases.
-    # The test_deploy function in tests/integration/test_charm.py reads upstream-source
-    # to determine which OCI image to use when running the charm's integration tests.
-    upstream-source: some-repo/some-image:some-tag
+    description: OCI image for the Beszel Hub container
+    upstream-source: henrygd/beszel:latest
+
+# Relations (Integrations)
+requires:
+  ingress:
+    interface: ingress
+    optional: true
+    limit: 1
+
+  oauth:
+    interface: oauth
+    optional: true
+    limit: 1
+
+  s3-credentials:
+    interface: s3
+    optional: true
+    limit: 1
+
+# Actions
+actions:
+  get-admin-url:
+    description: Get the URL to access the Beszel Hub admin interface
+
+  create-agent-token:
+    description: Create a universal token for agent authentication
+    params:
+      description:
+        description: Description for the token
+        type: string
+        default: ""
+
+  backup-now:
+    description: Trigger an immediate backup
+
+  list-backups:
+    description: List available backups
