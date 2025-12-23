@@ -33,9 +33,14 @@ def get_version(container: ops.Container) -> str | None:
     Returns:
         Version string or None if unable to determine
     """
-    proc = container.exec(["/beszel", "version"], timeout=5.0, combine_stderr=True)
+    proc = container.exec(["/beszel", "--version"], timeout=5.0, combine_stderr=True)
     stdout, _ = proc.wait_output()
     version = stdout.strip()
+
+    # Output format is "beszel version X.Y.Z", extract just the version number
+    if version.startswith("beszel version "):
+        version = version.replace("beszel version ", "")
+
     if version:
         return version
     return None
