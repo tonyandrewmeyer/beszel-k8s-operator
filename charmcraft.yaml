@@ -31,6 +31,15 @@ parts:
     build-snaps:
       - astral-uv
 
+# Charm libraries
+charm-libs:
+  - lib: traefik_k8s.ingress
+    version: "2"
+  - lib: hydra.oauth
+    version: "0"
+  - lib: data_platform_libs.s3
+    version: "0"
+
 # Configuration options for the charm
 config:
   options:

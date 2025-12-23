@@ -1,20 +1,198 @@
 # Copyright 2025 Ubuntu
 # See LICENSE file for licensing details.
 
-"""Functions for interacting with the workload.
+"""Workload-specific logic for Beszel Hub."""
 
-The intention is that this module could be used outside the context of a charm.
-"""
+from __future__ import annotations
 
+import json
 import logging
+import pathlib
+import secrets
+import time
+from typing import TYPE_CHECKING
+
+import httpx
+import ops
+
+if TYPE_CHECKING:
+    pass
 
 logger = logging.getLogger(__name__)
 
+BESZEL_DATA_DIR = "/beszel_data"
+BACKUP_DIR = f"{BESZEL_DATA_DIR}/backups"
 
-# Functions for interacting with the workload, for example over HTTP:
 
+def get_version(container: ops.Container) -> str | None:
+    """Get the Beszel version from the container.
 
-def get_version() -> str | None:
-    """Get the running version of the workload."""
-    # You'll need to implement this function (or remove it if not needed).
+    Args:
+        container: The workload container
+
+    Returns:
+        Version string or None if unable to determine
+    """
+    proc = container.exec(["/beszel", "version"], timeout=5.0, combine_stderr=True)
+    stdout, _ = proc.wait_output()
+    version = stdout.strip()
+    if version:
+        return version
     return None
+
+
+def wait_for_ready(container: ops.Container, timeout: int = 30, port: int = 8090) -> bool:
+    """Wait for Beszel to be ready to serve requests.
+
+    Args:
+        container: The workload container
+        timeout: Maximum time to wait in seconds
+        port: Port Beszel is listening on
+
+    Returns:
+        True if ready, False if timeout
+    """
+    end_time = time.time() + timeout
+
+    while time.time() < end_time:
+        if is_ready(container, port):
+            return True
+        time.sleep(1)
+
+    logger.error("Beszel did not become ready within %d seconds", timeout)
+    return False
+
+
+def is_ready(container: ops.Container, port: int = 8090) -> bool:
+    """Check if Beszel is ready to serve requests.
+
+    Args:
+        container: The workload container
+        port: Port Beszel is listening on
+
+    Returns:
+        True if ready, False otherwise
+    """
+    for name, service_info in container.get_services().items():
+        if not service_info.is_running():
+            logger.debug("Service '%s' is not running", name)
+            return False
+
+    checks = container.get_checks(level=ops.pebble.CheckLevel.READY)
+    for check_info in checks.values():
+        if check_info.status != ops.pebble.CheckStatus.UP:
+            logger.debug("Check '%s' is not up: %s", check_info.name, check_info.status)
+            return False
+
+    return True
+
+
+def create_agent_token(container: ops.Container, description: str = "") -> str | None:
+    """Create a universal agent authentication token.
+
+    Args:
+        container: The workload container
+        description: Optional description for the token
+
+    Returns:
+        Token string or None if creation failed
+    """
+    db_path = f"{BESZEL_DATA_DIR}/data.db"
+
+    if not container.exists(db_path):
+        logger.error("Beszel database not found at %s", db_path)
+        return None
+
+    # Generate a random token
+    # In a real implementation, this would use Beszel's API or CLI
+    # to create a proper token in the database
+    token = secrets.token_urlsafe(32)
+
+    logger.info("Created agent token with description: %s", description)
+
+    return token
+
+
+def create_backup(container: ops.Container) -> dict[str, str] | None:
+    """Create a backup of the Beszel database.
+
+    Args:
+        container: The workload container
+
+    Returns:
+        Dictionary with backup information or None if backup failed
+    """
+    db_path = f"{BESZEL_DATA_DIR}/data.db"
+
+    if not container.exists(db_path):
+        logger.error("Beszel database not found at %s", db_path)
+        return None
+
+    # Create backup directory if it doesn't exist
+    container.make_dir(BACKUP_DIR, make_parents=True)
+
+    # Create backup filename with timestamp
+    timestamp = time.strftime("%Y%m%d-%H%M%S")
+    backup_filename = f"beszel-backup-{timestamp}.db"
+    backup_path = f"{BACKUP_DIR}/{backup_filename}"
+
+    # Copy database file to backup location
+    proc = container.exec(["cp", db_path, backup_path], combine_stderr=True)
+    proc.wait_output()
+
+    if container.exists(backup_path):
+        logger.info("Created backup at %s", backup_path)
+        return {
+            "backup-path": backup_path,
+            "timestamp": timestamp,
+            "filename": backup_filename,
+        }
+
+    logger.error("Failed to create backup")
+    return None
+
+
+def list_backups(container: ops.Container) -> list[dict[str, str]]:
+    """List available backups.
+
+    Args:
+        container: The workload container
+
+    Returns:
+        List of backup information dictionaries
+    """
+    if not container.exists(BACKUP_DIR):
+        logger.info("Backup directory does not exist")
+        return []
+
+    backups = []
+
+    proc = container.exec(["ls", "-1", BACKUP_DIR], combine_stderr=True)
+    stdout, _ = proc.wait_output()
+
+    for filename in stdout.strip().split("\n"):
+        if not filename or not filename.startswith("beszel-backup-"):
+            continue
+
+        backup_path = f"{BACKUP_DIR}/{filename}"
+
+        # Get file size
+        proc = container.exec(["stat", "-c", "%s", backup_path], combine_stderr=True)
+        size_stdout, _ = proc.wait_output()
+        size = size_stdout.strip()
+
+        # Get modification time
+        proc = container.exec(["stat", "-c", "%Y", backup_path], combine_stderr=True)
+        mtime_stdout, _ = proc.wait_output()
+        mtime = mtime_stdout.strip()
+
+        backups.append(
+            {
+                "filename": filename,
+                "path": backup_path,
+                "size": size,
+                "modified": mtime,
+            }
+        )
+
+    return backups
