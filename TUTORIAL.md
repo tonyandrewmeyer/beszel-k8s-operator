@@ -16,7 +16,7 @@ Before you begin, ensure you have:
 First, deploy the Beszel Hub charm with persistent storage:
 
 ```bash
-juju deploy beszel --channel=edge --trust \
+juju deploy beszel --channel=edge \
   --storage beszel-data=5G
 ```
 

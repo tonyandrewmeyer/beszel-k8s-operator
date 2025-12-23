@@ -27,7 +27,7 @@ Beszel is a lightweight server monitoring solution that tracks system metrics, D
 ### Deploy the charm
 
 ```bash
-juju deploy beszel --channel=edge --trust \
+juju deploy beszel --channel=edge \
   --storage beszel-data=1G
 ```
 
