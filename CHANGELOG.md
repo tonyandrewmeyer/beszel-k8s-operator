@@ -49,6 +49,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Type checking errors in charm configuration parsing and OAuth provider info access
 - Unit test compatibility with ops.testing.Context API (storage→storages, action results location)
 - All linting issues: codespell, ruff check, ruff format, and pyright now pass with zero errors
+- Storage detection to use model.storages API instead of filesystem checks for better testability
+- All unit test failures - 16/16 tests now pass with exec mocks and proper scenario setup
 
 ### Security
 
