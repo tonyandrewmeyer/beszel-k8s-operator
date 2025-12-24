@@ -41,16 +41,5 @@
     "defaultMode": "acceptEdits"
   },
   "hooks": {
-    "PostToolUse": [
-      {
-        "matcher": "Write|Edit",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "uv run ruff format --fix"
-          }
-        ]
-      }
-    ]
   }
 }

@@ -209,7 +209,11 @@ class BeszelCharm(ops.CharmBase):
         config = BeszelConfig.from_charm_config(self.config)
 
         # Check for required storage
-        if not self.container.exists(BESZEL_DATA_DIR):
+        try:
+            if not list(self.model.storages["beszel-data"]):
+                self.unit.status = ops.BlockedStatus("Storage not attached")
+                return
+        except (KeyError, ops.ModelError):
             self.unit.status = ops.BlockedStatus("Storage not attached")
             return
 
