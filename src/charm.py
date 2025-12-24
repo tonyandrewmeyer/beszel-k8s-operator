@@ -92,7 +92,9 @@ class BeszelCharm(ops.CharmBase):
 
         # Event handlers
         framework.observe(self.on[CONTAINER_NAME].pebble_ready, self._on_pebble_ready)
-        framework.observe(self.on[CONTAINER_NAME].pebble_check_failed, self._on_pebble_check_failed)
+        framework.observe(
+            self.on[CONTAINER_NAME].pebble_check_failed, self._on_pebble_check_failed
+        )
         framework.observe(self.on.config_changed, self._on_config_changed)
         framework.observe(self.on.upgrade_charm, self._on_upgrade_charm)
 

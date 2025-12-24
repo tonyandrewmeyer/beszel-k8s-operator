@@ -231,8 +231,7 @@ def test_custom_port_configuration(deploy: jubilant.Juju):
 
     # Verify service is running after the configuration change
     result = juju.exec(
-        "PEBBLE_SOCKET=/charm/containers/beszel/pebble.socket "
-        "/charm/bin/pebble services",
+        "PEBBLE_SOCKET=/charm/containers/beszel/pebble.socket /charm/bin/pebble services",
         unit=unit_name,
     )
     assert "beszel" in result.stdout
