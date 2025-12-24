@@ -51,7 +51,7 @@ def test_config_from_charm_config():
         def get(self, key, default=None):
             return config_data.get(key, default)
 
-    config = BeszelConfig.from_charm_config(MockConfig())
+    config = BeszelConfig.from_charm_config(MockConfig())  # type: ignore[arg-type]
 
     assert config.container_image == "custom/image:tag"
     assert config.port == 8091
@@ -70,7 +70,7 @@ def test_config_defaults():
         def get(self, key, default=None):
             return default
 
-    config = BeszelConfig.from_charm_config(MockConfig())
+    config = BeszelConfig.from_charm_config(MockConfig())  # type: ignore[arg-type]
 
     assert config.container_image == "henrygd/beszel:latest"
     assert config.port == 8090
@@ -107,12 +107,12 @@ def test_pebble_ready_with_storage(ctx: ops.testing.Context):
             ops.testing.Container(
                 name=CONTAINER_NAME,
                 can_connect=True,
-                mounts={"beszel-data": ops.testing.Mount(location="/beszel_data")},
+                mounts={"beszel-data": ops.testing.Mount(location="/beszel_data", source="tmpfs")},
                 layers={},
-                service_status={},
+                service_statuses={},
             )
         ],
-        storage=[ops.testing.Storage("beszel-data")],
+        storages=[ops.testing.Storage("beszel-data")],
     )
 
     state_out = ctx.run(ctx.on.pebble_ready(CONTAINER_NAME), state_in)
@@ -141,12 +141,12 @@ def test_config_changed_updates_service(ctx: ops.testing.Context):
             ops.testing.Container(
                 name=CONTAINER_NAME,
                 can_connect=True,
-                mounts={"beszel-data": ops.testing.Mount(location="/beszel_data")},
+                mounts={"beszel-data": ops.testing.Mount(location="/beszel_data", source="tmpfs")},
                 layers={},
-                service_status={},
+                service_statuses={},
             )
         ],
-        storage=[ops.testing.Storage("beszel-data")],
+        storages=[ops.testing.Storage("beszel-data")],
     )
 
     state_out = ctx.run(ctx.on.config_changed(), state_in)
@@ -167,10 +167,10 @@ def test_health_check_configuration(ctx: ops.testing.Context):
             ops.testing.Container(
                 name=CONTAINER_NAME,
                 can_connect=True,
-                mounts={"beszel-data": ops.testing.Mount(location="/beszel_data")},
+                mounts={"beszel-data": ops.testing.Mount(location="/beszel_data", source="tmpfs")},
             )
         ],
-        storage=[ops.testing.Storage("beszel-data")],
+        storages=[ops.testing.Storage("beszel-data")],
     )
 
     state_out = ctx.run(ctx.on.pebble_ready(CONTAINER_NAME), state_in)
@@ -181,7 +181,7 @@ def test_health_check_configuration(ctx: ops.testing.Context):
     assert "beszel-ready" in layer.checks
     check = layer.checks["beszel-ready"]
     assert check.level == "ready"
-    assert "/beszel health" in check.exec.command
+    assert "/beszel health" in check.exec["command"]  # type: ignore[index]
     assert check.period == "60s"
 
 
@@ -197,9 +197,9 @@ def test_get_admin_url_action_no_ingress(ctx: ops.testing.Context):
         ],
     )
 
-    state_out = ctx.run(ctx.on.action("get-admin-url"), state_in)
+    ctx.run(ctx.on.action("get-admin-url"), state_in)
 
-    assert state_out.results.get("url") == "http://beszel:8090"
+    assert ctx.action_results.get("url") == "http://beszel:8090"  # type: ignore[union-attr]
 
 
 def test_get_admin_url_action_with_external_hostname(ctx: ops.testing.Context):
@@ -215,9 +215,9 @@ def test_get_admin_url_action_with_external_hostname(ctx: ops.testing.Context):
         ],
     )
 
-    state_out = ctx.run(ctx.on.action("get-admin-url"), state_in)
+    ctx.run(ctx.on.action("get-admin-url"), state_in)
 
-    assert state_out.results.get("url") == "https://beszel.example.com"
+    assert ctx.action_results.get("url") == "https://beszel.example.com"  # type: ignore[union-attr]
 
 
 def test_create_agent_token_action(ctx: ops.testing.Context):
@@ -228,23 +228,21 @@ def test_create_agent_token_action(ctx: ops.testing.Context):
             ops.testing.Container(
                 name=CONTAINER_NAME,
                 can_connect=True,
-                mounts={"beszel-data": ops.testing.Mount(location="/beszel_data")},
+                mounts={"beszel-data": ops.testing.Mount(location="/beszel_data", source="tmpfs")},
             )
         ],
-        storage=[ops.testing.Storage("beszel-data")],
+        storages=[ops.testing.Storage("beszel-data")],
     )
 
-    state_out = ctx.run(
-        ctx.on.action("create-agent-token", params={"description": "test"}), state_in
-    )
+    ctx.run(ctx.on.action("create-agent-token", params={"description": "test"}), state_in)
 
     # Should return a token
-    assert "token" in state_out.results
-    assert len(state_out.results["token"]) > 0
+    assert "token" in ctx.action_results  # type: ignore[operator]
+    assert len(ctx.action_results["token"]) > 0  # type: ignore[index]
 
     # Should include instructions
-    assert "instructions" in state_out.results
-    assert "HUB_URL" in state_out.results["instructions"]
+    assert "instructions" in ctx.action_results  # type: ignore[operator]
+    assert "HUB_URL" in ctx.action_results["instructions"]  # type: ignore[index]
 
 
 def test_create_agent_token_action_container_not_ready(ctx: ops.testing.Context):
@@ -275,11 +273,11 @@ def test_list_backups_action_no_backups(ctx: ops.testing.Context):
         ],
     )
 
-    state_out = ctx.run(ctx.on.action("list-backups"), state_in)
+    ctx.run(ctx.on.action("list-backups"), state_in)
 
-    assert "backups" in state_out.results
+    assert "backups" in ctx.action_results  # type: ignore[operator]
     # Result should be an empty list or serialized empty list
-    backups = state_out.results["backups"]
+    backups = ctx.action_results["backups"]  # type: ignore[index]
     assert backups == [] or backups == "[]"
 
 
@@ -336,10 +334,10 @@ def test_s3_environment_variables(ctx: ops.testing.Context):
             ops.testing.Container(
                 name=CONTAINER_NAME,
                 can_connect=True,
-                mounts={"beszel-data": ops.testing.Mount(location="/beszel_data")},
+                mounts={"beszel-data": ops.testing.Mount(location="/beszel_data", source="tmpfs")},
             )
         ],
-        storage=[ops.testing.Storage("beszel-data")],
+        storages=[ops.testing.Storage("beszel-data")],
     )
 
     state_out = ctx.run(ctx.on.config_changed(), state_in)
@@ -357,10 +355,10 @@ def test_upgrade_charm(ctx: ops.testing.Context):
             ops.testing.Container(
                 name=CONTAINER_NAME,
                 can_connect=True,
-                mounts={"beszel-data": ops.testing.Mount(location="/beszel_data")},
+                mounts={"beszel-data": ops.testing.Mount(location="/beszel_data", source="tmpfs")},
             )
         ],
-        storage=[ops.testing.Storage("beszel-data")],
+        storages=[ops.testing.Storage("beszel-data")],
     )
 
     state_out = ctx.run(ctx.on.upgrade_charm(), state_in)

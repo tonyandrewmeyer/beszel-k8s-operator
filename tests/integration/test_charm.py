@@ -3,6 +3,7 @@
 #
 # The integration tests use the Jubilant library. See https://documentation.ubuntu.com/jubilant/
 # To learn more about testing, see https://documentation.ubuntu.com/ops/latest/explanation/testing/
+# pyright: reportAttributeAccessIssue=false, reportArgumentType=false, reportCallIssue=false, reportOptionalMemberAccess=false
 
 import logging
 import pathlib

@@ -61,14 +61,14 @@ class BeszelConfig(BaseModel):
             BeszelConfig instance
         """
         return cls(
-            container_image=config.get("container-image", "henrygd/beszel:latest"),
+            container_image=str(config.get("container-image", "henrygd/beszel:latest")),
             port=int(config.get("port", 8090)),
-            external_hostname=config.get("external-hostname", ""),
+            external_hostname=str(config.get("external-hostname", "")),
             s3_backup_enabled=bool(config.get("s3-backup-enabled", False)),
-            s3_endpoint=config.get("s3-endpoint", ""),
-            s3_bucket=config.get("s3-bucket", ""),
-            s3_region=config.get("s3-region", "us-east-1"),
-            log_level=config.get("log-level", "info"),
+            s3_endpoint=str(config.get("s3-endpoint", "")),
+            s3_bucket=str(config.get("s3-bucket", "")),
+            s3_region=str(config.get("s3-region", "us-east-1")),
+            log_level=str(config.get("log-level", "info")),
         )
 
 
@@ -254,13 +254,10 @@ class BeszelCharm(ops.CharmBase):
         # Add OAuth configuration if available
         if self.oauth.is_client_created():
             provider_info = self.oauth.get_provider_info()
-            client_id = provider_info.get("client_id")
-            client_secret = self.oauth.get_client_secret()
-
-            if client_id and client_secret:
-                env["OIDC_CLIENT_ID"] = client_id
-                env["OIDC_CLIENT_SECRET"] = client_secret
-                env["OIDC_ISSUER_URL"] = provider_info.get("issuer_url", "")
+            if provider_info and provider_info.client_id and provider_info.client_secret:
+                env["OIDC_CLIENT_ID"] = provider_info.client_id
+                env["OIDC_CLIENT_SECRET"] = provider_info.client_secret
+                env["OIDC_ISSUER_URL"] = provider_info.issuer_url
                 env["OIDC_REDIRECT_URI"] = f"https://{config.external_hostname}/_/#/auth/oidc"
 
         # Add S3 configuration if enabled and available
