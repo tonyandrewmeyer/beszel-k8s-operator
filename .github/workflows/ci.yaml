@@ -87,8 +87,7 @@ jobs:
       - name: Set up Concierge
         run: |
           sudo snap install concierge --classic
-          sudo snap install juju --channel=3.6/stable --classic
-          concierge prepare -p dev
+          sudo concierge prepare -p dev
 
       - name: Build charm
         run: charmcraft pack
