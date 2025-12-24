@@ -222,7 +222,7 @@ def test_health_check_configuration(ctx: ops.testing.Context):
 
     assert "beszel-ready" in layer.checks
     check = layer.checks["beszel-ready"]
-    assert check.level.value == "ready"
+    assert check.level == "ready" or check.level.value == "ready"  # type: ignore[union-attr]
     assert "/beszel health" in check.exec["command"]  # type: ignore[index]
     assert check.period == "60s"
 
@@ -267,7 +267,9 @@ def test_create_agent_token_action(ctx: ops.testing.Context, monkeypatch):
     # Mock the create_agent_token function to return a fake token
     import beszel
 
-    monkeypatch.setattr(beszel, "create_agent_token", lambda container, description: "fake-token-123")
+    monkeypatch.setattr(
+        beszel, "create_agent_token", lambda container, description: "fake-token-123"
+    )
 
     state_in = ops.testing.State(
         leader=True,
