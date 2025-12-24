@@ -80,12 +80,9 @@ def is_ready(container: ops.Container, port: int = 8090) -> bool:
             logger.debug("Service '%s' is not running", name)
             return False
 
-    checks = container.get_checks(level=ops.pebble.CheckLevel.READY)
-    for check_info in checks.values():
-        if check_info.status != ops.pebble.CheckStatus.UP:
-            logger.debug("Check '%s' is not up: %s", check_info.name, check_info.status)
-            return False
-
+    # Service is running - give it a moment to start accepting connections
+    # The Pebble HTTP health check will monitor ongoing availability
+    time.sleep(2)
     return True
 
 

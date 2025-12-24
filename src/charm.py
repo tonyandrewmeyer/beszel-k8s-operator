@@ -92,6 +92,7 @@ class BeszelCharm(ops.CharmBase):
 
         # Event handlers
         framework.observe(self.on[CONTAINER_NAME].pebble_ready, self._on_pebble_ready)
+        framework.observe(self.on[CONTAINER_NAME].pebble_check_failed, self._on_pebble_check_failed)
         framework.observe(self.on.config_changed, self._on_config_changed)
         framework.observe(self.on.upgrade_charm, self._on_upgrade_charm)
 
@@ -138,6 +139,16 @@ class BeszelCharm(ops.CharmBase):
             event: Pebble ready event
         """
         self._configure_workload()
+
+    def _on_pebble_check_failed(self, event: ops.PebbleCheckFailedEvent) -> None:
+        """Handle pebble check failed event.
+
+        Args:
+            event: Pebble check failed event
+        """
+        logger.warning("Pebble check '%s' failed", event.info.name)
+        # The on-check-failure action in the Pebble layer will restart the service
+        # We just log the event and let Pebble handle the recovery
 
     def _on_config_changed(self, event: ops.ConfigChangedEvent) -> None:
         """Handle config-changed event.
@@ -305,8 +316,9 @@ class BeszelCharm(ops.CharmBase):
                 "beszel-ready": {
                     "override": "replace",
                     "level": "ready",
-                    "exec": {"command": f"/beszel health --url http://localhost:{config.port}"},
-                    "period": "60s",
+                    "http": {"url": f"http://localhost:{config.port}/"},
+                    "period": "10s",
+                    "threshold": 3,
                 }
             },
         }
