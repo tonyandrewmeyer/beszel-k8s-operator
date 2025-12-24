@@ -264,7 +264,7 @@ Verify DNS points to your ingress controller's external IP.
 - [Beszel Documentation](https://beszel.dev)
 - [Juju Documentation](https://juju.is/docs)
 - [Charm README](README.md)
-- [Report Issues](https://github.com/your-org/beszel-operator/issues)
+- [Report Issues](https://github.com/tonyandrewmeyer/beszel-k8s-operator/issues)
 
 ## Getting Help
 

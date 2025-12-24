@@ -178,9 +178,9 @@ This charm is licensed under the Apache License 2.0. See [LICENSE](LICENSE) for 
 ## Links
 
 - **Beszel Documentation**: https://beszel.dev
-- **Charm Source**: https://github.com/your-org/beszel-operator
+- **Charm Source**: https://github.com/tonyandrewmeyer/beszel-k8s-operator
 - **Juju Documentation**: https://juju.is/docs
-- **File Issues**: https://github.com/your-org/beszel-operator/issues
+- **File Issues**: https://github.com/tonyandrewmeyer/beszel-k8s-operator/issues
 
 ## Related Charms
 
