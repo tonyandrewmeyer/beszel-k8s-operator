@@ -10,7 +10,7 @@ import pathlib
 import sys
 import time
 
-import jubilant
+import jubilant  # type: ignore[import-untyped]
 import pytest
 
 logger = logging.getLogger(__name__)

@@ -37,7 +37,7 @@ jobs:
         run: uv run codespell src/ tests/
 
       - name: Run pyright
-        run: uv run pyright src/ tests/
+        run: PYTHONPATH=lib:src uv run pyright src/ tests/
 
   unit:
     name: Unit Tests

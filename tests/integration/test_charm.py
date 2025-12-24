@@ -8,7 +8,7 @@
 import logging
 import pathlib
 
-import jubilant
+import jubilant  # type: ignore[import-untyped]
 import pytest
 import yaml
 
