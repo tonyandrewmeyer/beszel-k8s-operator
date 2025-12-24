@@ -46,6 +46,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Backup implementation to use Pebble pull/push APIs instead of shell exec commands
 - List backups implementation to use Pebble list_files API instead of shell exec commands
 - All dependencies properly included in uv.lock (jsonschema, pydantic, httpx, etc.)
+- Type checking errors in charm configuration parsing and OAuth provider info access
+- Unit test compatibility with ops.testing.Context API (storage→storages, action results location)
+- All linting issues: codespell, ruff check, ruff format, and pyright now pass with zero errors
 
 ### Security
 
