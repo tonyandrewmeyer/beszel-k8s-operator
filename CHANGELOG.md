@@ -59,4 +59,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - No hardcoded secrets in charm code
 - All shell commands eliminated from backup operations
 
-[Unreleased]: https://github.com/your-org/beszel-operator/compare/v0.0.0...HEAD
+[Unreleased]: https://github.com/tonyandrewmeyer/beszel-k8s-operator/compare/v0.0.0...HEAD
