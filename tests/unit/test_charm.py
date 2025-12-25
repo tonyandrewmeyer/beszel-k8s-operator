@@ -221,7 +221,7 @@ def test_health_check_configuration(ctx: ops.testing.Context):
     check = layer.checks["beszel-ready"]
     assert check.level == "ready" or check.level.value == "ready"  # type: ignore[union-attr]
     assert check.http is not None
-    assert check.http["url"] == "http://localhost:8090/"
+    assert check.http.get("url") == "http://localhost:8090/"
     assert check.period == "10s"
     assert check.threshold == 3
 
