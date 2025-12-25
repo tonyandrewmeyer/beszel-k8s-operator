@@ -71,8 +71,10 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v6
 
-      - name: Install charmcraft
-        run: sudo snap install charmcraft --classic
+      - name: Set up development environment with Concierge
+        run: |
+          sudo snap install concierge --classic
+          sudo concierge prepare -p dev
 
       - name: Run integration tests via spread
         run: charmcraft test
