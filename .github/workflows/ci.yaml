@@ -74,32 +74,5 @@ jobs:
       - name: Install charmcraft
         run: sudo snap install charmcraft --classic
 
-      - name: Install uv
-        uses: astral-sh/setup-uv@v7
-        with:
-          enable-cache: true
-
-      - name: Set up Python
-        uses: actions/setup-python@v6
-        with:
-          python-version: '3.10'
-
-      - name: Set up Concierge
-        run: |
-          sudo snap install concierge --classic
-          sudo concierge prepare -p dev
-
-      - name: Build charm
-        run: charmcraft pack
-
-      - name: Install test dependencies
-        run: uv sync --group integration
-
-      - name: Run integration tests
-        run: uv run pytest tests/integration -v
-
-      - name: Dump logs on failure
-        if: failure()
-        run: |
-          juju status --format=yaml || true
-          juju debug-log --limit=500 || true
+      - name: Run integration tests via spread
+        run: charmcraft test

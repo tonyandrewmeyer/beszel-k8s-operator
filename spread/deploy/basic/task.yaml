@@ -1,0 +1,36 @@
+summary: Run Beszel integration tests
+
+environment:
+  MODEL: "$(HOST: uuidgen)"
+
+prepare: |
+  # Add a Juju model for testing
+  juju add-model "${MODEL}"
+
+  # Install uv for Python dependency management
+  curl -LsSf https://astral.sh/uv/install.sh | sh
+  export PATH="$HOME/.local/bin:$PATH"
+
+  # Install Python (if not already available)
+  apt-get update
+  apt-get install -y python3 python3-venv
+
+  # Set up uv and install test dependencies
+  cd "${PROJECT_PATH}"
+  uv sync --group integration
+
+execute: |
+  cd "${PROJECT_PATH}"
+
+  # Ensure uv is in PATH
+  export PATH="$HOME/.local/bin:$PATH"
+
+  # Set CHARM_PATH to the packed charm artifact
+  export CHARM_PATH="${CRAFT_ARTIFACT}"
+
+  # Run integration tests using pytest with Jubilant
+  uv run pytest tests/integration -v --tb=short
+
+restore: |
+  # Clean up the Juju model
+  juju destroy-model --no-prompt --force --destroy-storage --no-wait --timeout=60s "${MODEL}" || true
