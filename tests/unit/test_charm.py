@@ -206,9 +206,6 @@ def test_health_check_configuration(ctx: ops.testing.Context):
                 mounts={"beszel-data": ops.testing.Mount(location="/beszel_data", source="tmpfs")},
                 execs={
                     ops.testing.Exec(["/beszel", "--version"], stdout="beszel version 0.17.0\n"),
-                    ops.testing.Exec(
-                        ["/beszel", "health", "--url", "http://localhost:8090"], return_code=0
-                    ),
                 },
             )
         ],
@@ -223,8 +220,10 @@ def test_health_check_configuration(ctx: ops.testing.Context):
     assert "beszel-ready" in layer.checks
     check = layer.checks["beszel-ready"]
     assert check.level == "ready" or check.level.value == "ready"  # type: ignore[union-attr]
-    assert "/beszel health" in check.exec["command"]  # type: ignore[index]
-    assert check.period == "60s"
+    assert check.http is not None
+    assert check.http["url"] == "http://localhost:8090/"
+    assert check.period == "10s"
+    assert check.threshold == 3
 
 
 def test_get_admin_url_action_no_ingress(ctx: ops.testing.Context):
