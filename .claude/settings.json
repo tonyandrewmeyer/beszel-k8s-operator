@@ -47,7 +47,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "uv run ruff format {file_path}"
+            "command": "/home/ubuntu/beszel-operator/.claude/format-if-python.sh {file_path}"
           }
         ]
       }
