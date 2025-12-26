@@ -58,5 +58,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - S3 credentials obtained from relation data
 - No hardcoded secrets in charm code
 - All shell commands eliminated from backup operations
+- GitHub Actions workflows hardened with Zizmor security improvements:
+  - Added `persist-credentials: false` to all checkout actions to prevent credential leakage
+  - Pinned `astral-sh/setup-uv` action to specific commit hash (v7.1.6) to prevent supply chain attacks
+  - Added explicit minimal permissions (`contents: read`) to all jobs to follow principle of least privilege
 
 [Unreleased]: https://github.com/tonyandrewmeyer/beszel-k8s-operator/compare/v0.0.0...HEAD
