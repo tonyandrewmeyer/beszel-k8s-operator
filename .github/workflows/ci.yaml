@@ -73,6 +73,8 @@ jobs:
 
       - name: Set up development environment with Concierge
         run: |
+          sudo apt-get remove -y docker-ce docker-ce-cli containerd.io
+          sudo rm -rf /run/containerd
           sudo snap install concierge --classic
           sudo concierge prepare -p dev
 
