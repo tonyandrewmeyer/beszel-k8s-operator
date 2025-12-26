@@ -167,6 +167,13 @@ juju deploy beszel --storage beszel-data=10G
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) for development setup, testing guidelines, and contribution process.
 
+### Development Transcripts
+
+Claude Code transcripts documenting the development process are available at:
+**[View Development Transcripts](https://tonyandrewmeyer.github.io/beszel-k8s-operator/)**
+
+These transcripts show the problem-solving approach, code changes, and rationale during charm development.
+
 ## Security
 
 To report security vulnerabilities, please see [SECURITY.md](SECURITY.md).
