@@ -7,14 +7,34 @@ prepare: |
   # Remove Docker containerd directory if it exists (conflicts with k8s snap)
   sudo rm -rf /run/containerd
 
-  # Remove any existing k8s installation to ensure clean state
-  sudo snap remove --purge k8s 2>/dev/null || true
+  # Retry loop for concierge prepare (k8s bootstrap can be flaky)
+  max_attempts=3
+  attempt=1
+  while [ $attempt -le $max_attempts ]; do
+    echo "Attempt $attempt of $max_attempts: Running concierge prepare..."
 
-  # Kill any processes on k8s/etcd ports to ensure clean state
-  sudo fuser -k 2379/tcp 2380/tcp 6443/tcp 10250/tcp 2>/dev/null || true
+    if concierge prepare --trace -p dev; then
+      echo "Concierge prepare succeeded!"
+      break
+    else
+      echo "Concierge prepare failed on attempt $attempt"
 
-  # Setup Juju environment with concierge
-  concierge prepare --trace -p dev
+      if [ $attempt -lt $max_attempts ]; then
+        echo "Cleaning up for retry..."
+        # Kill processes on k8s/etcd ports
+        sudo fuser -k 2379/tcp 2380/tcp 6443/tcp 10250/tcp 2>/dev/null || true
+        # Remove k8s snap to ensure clean state
+        sudo snap remove --purge k8s 2>/dev/null || true
+        # Wait for cleanup to complete
+        sleep 5
+      else
+        echo "All attempts failed"
+        exit 1
+      fi
+    fi
+
+    attempt=$((attempt + 1))
+  done
 
   # Add a Juju model for testing
   juju add-model "${MODEL}"
