@@ -90,5 +90,8 @@ jobs:
           sudo apt-get remove -y docker-ce docker-ce-cli containerd.io
           sudo rm -rf /run/containerd
 
+      - name: Install charmcraft
+        run: sudo snap install charmcraft --classic
+
       - name: Run integration tests via spread
         run: charmcraft test
