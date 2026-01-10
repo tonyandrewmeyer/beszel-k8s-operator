@@ -45,6 +45,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Health check configuration to use Beszel's native `/beszel health` command with 60s period
 - Backup implementation to use Pebble pull/push APIs instead of shell exec commands
 - List backups implementation to use Pebble list_files API instead of shell exec commands
+- CI integration tests to use microk8s profile instead of dev profile for proper Kubernetes charm testing
 - All dependencies properly included in uv.lock (jsonschema, pydantic, httpx, etc.)
 - Type checking errors in charm configuration parsing and OAuth provider info access
 - Unit test compatibility with ops.testing.Context API (storage→storages, action results location)
