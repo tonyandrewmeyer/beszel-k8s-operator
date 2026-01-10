@@ -43,22 +43,22 @@ prepare: |
   snap install --classic astral-uv
 
   # Set up uv and install test dependencies
-  cd "${PROJECT_PATH}"
+  cd "${SPREAD_PATH}"
   uv sync --group integration
 
   # Pack the charm if not already packed
-  if [[ ! -f "${PROJECT_PATH}"/*.charm ]]; then
+  if [[ ! -f "${SPREAD_PATH}"/*.charm ]]; then
     charmcraft pack
   fi
 
   # Ensure charm is owned by the current user
-  chown "$(id -u):$(id -g)" "${PROJECT_PATH}"/*.charm
+  chown "$(id -u):$(id -g)" "${SPREAD_PATH}"/*.charm
 
 execute: |
-  cd "${PROJECT_PATH}"
+  cd "${SPREAD_PATH}"
 
   # Find the charm file
-  CHARM_PATH="$(ls "${PROJECT_PATH}"/*.charm | head -1)"
+  CHARM_PATH="$(ls "${SPREAD_PATH}"/*.charm | head -1)"
   export CHARM_PATH
 
   # Run integration tests using pytest with Jubilant
