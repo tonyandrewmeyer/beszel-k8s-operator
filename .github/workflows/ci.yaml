@@ -85,28 +85,22 @@ jobs:
         with:
           persist-credentials: false
 
-      - name: Set up development environment with Concierge
+      - name: Remove Docker to avoid conflicts with LXD
         run: |
           sudo apt-get remove -y docker-ce docker-ce-cli containerd.io
           sudo rm -rf /run/containerd
-          sudo snap install concierge --classic
-          sudo concierge prepare -p dev
 
-      - name: Install uv
-        uses: astral-sh/setup-uv@61cb8a9741eeb8a550a1b8544337180c0fc8476b # v7.2.0
-        with:
-          enable-cache: true
+      - name: Install and configure LXD
+        run: |
+          sudo snap refresh lxd --channel=latest/stable
+          sudo lxd waitready
+          sudo lxd init --auto
+          sudo lxc network set lxdbr0 ipv6.address none
+          sudo lxc network set lxdbr0 dns.mode managed
+          sudo usermod -aG lxd $USER
 
-      - name: Set up Python
-        uses: actions/setup-python@v6
-        with:
-          python-version: '3.10'
+      - name: Install charmcraft
+        run: sudo snap install charmcraft --classic
 
-      - name: Install dependencies
-        run: uv sync --group integration
-
-      - name: Pack charm
-        run: charmcraft pack
-
-      - name: Run integration tests
-        run: uv run pytest tests/integration -v --tb=short
+      - name: Run integration tests via charmcraft test
+        run: sg lxd -c 'charmcraft test'
