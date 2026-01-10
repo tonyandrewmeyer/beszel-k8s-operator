@@ -1,11 +1,6 @@
 project: beszel-operator
 
 backends:
-  craft:
-    type: craft
-    systems:
-      - ubuntu-24.04
-
   github-ci:
     type: adhoc
     manual: true
