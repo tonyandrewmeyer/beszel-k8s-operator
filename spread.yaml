@@ -25,10 +25,6 @@ backends:
           username: spread
           workers: 1
 
-prepare: |
-  # Juju needs the charm etc. to be owned by the running user.
-  chown -R "${USER}" "${PROJECT_PATH}"
-
 environment:
   CI: "$(HOST: echo ${CI:-})"
 
