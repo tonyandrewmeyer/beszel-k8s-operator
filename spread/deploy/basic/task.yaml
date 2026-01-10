@@ -4,6 +4,9 @@ environment:
   MODEL: "$(HOST: uuidgen)"
 
 prepare: |
+  # Remove Docker containerd directory if it exists (conflicts with k8s snap)
+  sudo rm -rf /run/containerd
+
   # Setup Juju environment with concierge
   concierge prepare --trace -p dev
 
