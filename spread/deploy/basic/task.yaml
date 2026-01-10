@@ -7,6 +7,12 @@ prepare: |
   # Remove Docker containerd directory if it exists (conflicts with k8s snap)
   sudo rm -rf /run/containerd
 
+  # Remove any existing k8s installation to ensure clean state
+  sudo snap remove --purge k8s 2>/dev/null || true
+
+  # Kill any processes on k8s/etcd ports to ensure clean state
+  sudo fuser -k 2379/tcp 2380/tcp 6443/tcp 10250/tcp 2>/dev/null || true
+
   # Setup Juju environment with concierge
   concierge prepare --trace -p dev
 
