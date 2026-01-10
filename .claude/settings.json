@@ -39,18 +39,5 @@
     ],
     "additionalDirectories": [],
     "defaultMode": "acceptEdits"
-  },
-  "hooks": {
-    "PostToolUse": [
-      {
-        "matcher": "Edit",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "/home/ubuntu/beszel-operator/.claude/format-if-python.sh {file_path}"
-          }
-        ]
-      }
-    ]
   }
 }

@@ -124,7 +124,7 @@ allocate() {
     exec 1>&2
 
     case "$1" in
-    lxd-vm)
+    craft|lxd-vm)
         allocate_lxdvm
         ;;
     ci)
@@ -138,7 +138,7 @@ allocate() {
 
 discard() {
     case "$1" in
-    lxd-vm)
+    craft|lxd-vm)
         discard_lxdvm
         ;;
     ci)
