@@ -4,16 +4,13 @@ environment:
   MODEL: "$(HOST: uuidgen)"
 
 prepare: |
-  # Remove Docker containerd directory if it exists (conflicts with k8s snap)
-  sudo rm -rf /run/containerd
-
-  # Retry loop for concierge prepare (k8s bootstrap can be flaky)
+  # Retry loop for concierge prepare (microk8s bootstrap can be flaky)
   max_attempts=3
   attempt=1
   while [ $attempt -le $max_attempts ]; do
-    echo "Attempt $attempt of $max_attempts: Running concierge prepare..."
+    echo "Attempt $attempt of $max_attempts: Running concierge prepare with microk8s profile..."
 
-    if concierge prepare --trace -p dev; then
+    if concierge prepare --trace -p microk8s; then
       echo "Concierge prepare succeeded!"
       break
     else
@@ -21,10 +18,8 @@ prepare: |
 
       if [ $attempt -lt $max_attempts ]; then
         echo "Cleaning up for retry..."
-        # Kill processes on k8s/etcd ports
-        sudo fuser -k 2379/tcp 2380/tcp 6443/tcp 10250/tcp 2>/dev/null || true
-        # Remove k8s snap to ensure clean state
-        sudo snap remove --purge k8s 2>/dev/null || true
+        # Remove microk8s completely to ensure clean state
+        sudo snap remove --purge microk8s 2>/dev/null || true
         # Wait for cleanup to complete
         sleep 5
       else
