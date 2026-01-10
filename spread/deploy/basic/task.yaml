@@ -4,29 +4,33 @@ environment:
   MODEL: "$(HOST: uuidgen)"
 
 prepare: |
+  # Setup Juju environment with concierge
+  concierge prepare --trace -p dev
+
   # Add a Juju model for testing
   juju add-model "${MODEL}"
 
   # Install uv for Python dependency management
-  curl -LsSf https://astral.sh/uv/install.sh | sh
-  export PATH="$HOME/.local/bin:$PATH"
-
-  # Install Python (if not already available)
-  apt-get update
-  apt-get install -y python3 python3-venv
+  snap install --classic astral-uv
 
   # Set up uv and install test dependencies
   cd "${PROJECT_PATH}"
   uv sync --group integration
 
+  # Pack the charm if not already packed
+  if [[ ! -f "${PROJECT_PATH}"/*.charm ]]; then
+    charmcraft pack
+  fi
+
+  # Ensure charm is owned by the current user
+  chown "$(id -u):$(id -g)" "${PROJECT_PATH}"/*.charm
+
 execute: |
   cd "${PROJECT_PATH}"
 
-  # Ensure uv is in PATH
-  export PATH="$HOME/.local/bin:$PATH"
-
-  # Set CHARM_PATH to the packed charm artifact
-  export CHARM_PATH="${CRAFT_ARTIFACT}"
+  # Find the charm file
+  CHARM_PATH="$(ls "${PROJECT_PATH}"/*.charm | head -1)"
+  export CHARM_PATH
 
   # Run integration tests using pytest with Jubilant
   uv run pytest tests/integration -v --tb=short
@@ -34,3 +38,8 @@ execute: |
 restore: |
   # Clean up the Juju model
   juju destroy-model --no-prompt --force --destroy-storage --no-wait --timeout=60s "${MODEL}" || true
+
+  # Restore concierge environment if not in CI
+  if [[ -z "${CI:-}" ]]; then
+    concierge restore --trace || true
+  fi

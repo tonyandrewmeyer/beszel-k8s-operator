@@ -76,7 +76,7 @@ jobs:
 
   integration:
     name: Integration Tests
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     permissions:
       contents: read
     steps:
@@ -85,27 +85,14 @@ jobs:
         with:
           persist-credentials: false
 
-      - name: Remove Docker to avoid conflicts with LXD
-        run: |
-          sudo apt-get remove -y docker-ce docker-ce-cli containerd.io
-          sudo rm -rf /run/containerd
-
-      - name: Install and configure LXD
-        run: |
-          sudo snap refresh lxd --channel=latest/stable
-          sudo lxd waitready
-          sudo lxd init --auto
-          # Configure network for GitHub Actions environment
-          sudo lxc network set lxdbr0 ipv6.address none
-          sudo lxc network set lxdbr0 ipv4.nat true
-          sudo lxc network set lxdbr0 dns.mode managed
-          # Enable IP forwarding
-          sudo sysctl -w net.ipv4.ip_forward=1
-          sudo sysctl -w net.ipv6.conf.all.forwarding=1
-          sudo usermod -aG lxd $USER
+      - name: Setup LXD
+        uses: canonical/setup-lxd@8c6a87bfb56aa48f3fb9b830baa18562d8bfd4ee
 
       - name: Install charmcraft
         run: sudo snap install charmcraft --classic
 
-      - name: Run integration tests via charmcraft test
-        run: sg lxd -c 'charmcraft test --destructive-mode'
+      - name: Install concierge
+        run: sudo snap install concierge --classic
+
+      - name: Run integration tests via spread
+        run: charmcraft.spread -v github-ci:ubuntu-24.04:spread/deploy/
