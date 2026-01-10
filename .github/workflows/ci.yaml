@@ -107,14 +107,5 @@ jobs:
       - name: Install charmcraft
         run: sudo snap install charmcraft --classic
 
-      - name: Verify LXD network
-        run: |
-          sg lxd -c 'lxc launch ubuntu:22.04 test-connectivity'
-          sleep 10
-          sg lxd -c 'lxc exec test-connectivity -- cloud-init status --wait' || true
-          sg lxd -c 'lxc exec test-connectivity -- ping -c 1 8.8.8.8'
-          sg lxd -c 'lxc exec test-connectivity -- ping -c 1 google.com'
-          sg lxd -c 'lxc delete test-connectivity --force'
-
       - name: Run integration tests via charmcraft test
-        run: sg lxd -c 'charmcraft test'
+        run: sg lxd -c 'charmcraft test --destructive-mode'
