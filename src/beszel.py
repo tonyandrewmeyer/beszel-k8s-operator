@@ -8,12 +8,8 @@ from __future__ import annotations
 import logging
 import secrets
 import time
-from typing import TYPE_CHECKING
 
 import ops
-
-if TYPE_CHECKING:
-    pass
 
 logger = logging.getLogger(__name__)
 
@@ -41,49 +37,6 @@ def get_version(container: ops.Container) -> str | None:
     if version:
         return version
     return None
-
-
-def wait_for_ready(container: ops.Container, timeout: int = 30, port: int = 8090) -> bool:
-    """Wait for Beszel to be ready to serve requests.
-
-    Args:
-        container: The workload container
-        timeout: Maximum time to wait in seconds
-        port: Port Beszel is listening on
-
-    Returns:
-        True if ready, False if timeout
-    """
-    end_time = time.time() + timeout
-
-    while time.time() < end_time:
-        if is_ready(container, port):
-            return True
-        time.sleep(1)
-
-    logger.error("Beszel did not become ready within %d seconds", timeout)
-    return False
-
-
-def is_ready(container: ops.Container, port: int = 8090) -> bool:
-    """Check if Beszel is ready to serve requests.
-
-    Args:
-        container: The workload container
-        port: Port Beszel is listening on
-
-    Returns:
-        True if ready, False otherwise
-    """
-    for name, service_info in container.get_services().items():
-        if not service_info.is_running():
-            logger.debug("Service '%s' is not running", name)
-            return False
-
-    # Service is running - give it a moment to start accepting connections
-    # The Pebble HTTP health check will monitor ongoing availability
-    time.sleep(2)
-    return True
 
 
 def create_agent_token(container: ops.Container, description: str = "") -> str | None:
