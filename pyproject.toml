@@ -13,7 +13,7 @@ dependencies = [
     "ops>=3,<4",
     "httpx>=0.28.1",
     "jsonschema",  # Required by oauth charm library
-    "pydantic>=2.0",
+    "pydantic>=2.13.0",
 ]
 
 [dependency-groups]
