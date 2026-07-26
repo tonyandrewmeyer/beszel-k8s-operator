@@ -201,9 +201,7 @@ for file_info in container.list_files(BACKUP_DIR, pattern="beszel-backup-*.db"):
 
 ### Ingress Integration
 ```python
-self.ingress = ingress.IngressPerAppRequirer(
-    self, port=8090, strip_prefix=True
-)
+self.ingress = ingress.IngressPerAppRequirer(self, port=8090, strip_prefix=True)
 
 # Automatically provides URL:
 if self.ingress.url:

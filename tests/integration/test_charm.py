@@ -41,7 +41,7 @@ def test_deploy_with_storage(deploy: jubilant.Juju):
 
     # Verify unit is active
     assert len(app.units) == 1
-    unit = list(app.units.values())[0]
+    unit = next(iter(app.units.values()))
     assert unit.workload_status.current == "active", (
         f"Unit status is {unit.workload_status.current}"
     )
