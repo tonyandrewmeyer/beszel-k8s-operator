@@ -19,7 +19,7 @@ dependencies = [
 [dependency-groups]
 # Dependencies of linting and static type checks
 lint = [
-    "ruff>=0.16.1",
+    "ruff>=0.16.3",
     "codespell",
     "pyright",
     "zizmor>=1.29.0",
