@@ -18,7 +18,7 @@ Beszel is a lightweight server monitoring solution that tracks system metrics, D
 
 ## Requirements
 
-- Juju >= 3.1
+- Juju >= 3.6
 - Kubernetes cluster
 - Storage provider (for persistent volume)
 
