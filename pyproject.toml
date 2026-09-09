@@ -22,7 +22,7 @@ lint = [
     "ruff>=0.16.4",
     "codespell",
     "pyright",
-    "zizmor>=1.29.0",
+    "zizmor>=1.30.0",
 ]
 # Dependencies of unit tests
 unit = [
