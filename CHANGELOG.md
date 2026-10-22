@@ -29,15 +29,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- N/A (initial release)
-
-### Deprecated
-
-- N/A
+- Adopt typed configuration via `ops.CharmBase.load_config()` with a Pydantic
+  `BeszelConfig` model, removing the hand-written `from_charm_config` mapping
+- Adopt typed action parameters via `ActionEvent.load_params()` with a
+  `CreateAgentTokenParams` dataclass
+- Report unit status from a single `collect_unit_status` handler instead of
+  setting status imperatively across event handlers
+- Publish the configured `port` to the ingress requirer instead of a
+  hard-coded `8090`, and keep it in sync on configuration changes
+- Unit tests now autoload metadata from `charmcraft.yaml` (no `meta`/`config`/
+  `actions` overrides passed to `testing.Context`) and exercise the workload
+  module against a real Pebble filesystem; coverage raised to ~92%
+- `charmcraft.yaml` now declares an `assumes` block (`juju >= 3.6`, `k8s-api`)
+  and `additionalProperties: false` on every action
 
 ### Removed
 
-- N/A
+- Blocking `beszel.wait_for_ready` / `beszel.is_ready` readiness polling
+  (with `time.sleep`); readiness is handled by the Pebble `ready` health check
 
 ### Fixed
 

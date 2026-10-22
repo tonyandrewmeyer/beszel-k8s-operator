@@ -24,6 +24,11 @@ platforms:
   amd64:
   arm64:
 
+# Fail fast on controllers that cannot run this charm.
+assumes:
+  - juju >= 3.6
+  - k8s-api
+
 parts:
   charm:
     plugin: uv
@@ -138,9 +143,11 @@ requires:
 actions:
   get-admin-url:
     description: Get the URL to access the Beszel Hub admin interface
+    additionalProperties: false
 
   create-agent-token:
     description: Create a universal token for agent authentication
+    additionalProperties: false
     params:
       description:
         description: Description for the token
@@ -149,6 +156,8 @@ actions:
 
   backup-now:
     description: Trigger an immediate backup
+    additionalProperties: false
 
   list-backups:
     description: List available backups
+    additionalProperties: false
